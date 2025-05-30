@@ -1,0 +1,25 @@
+FROM node:18
+
+WORKDIR /app
+
+# Копируем все package.json/yarn.lock
+COPY package.json yarn.lock ./
+COPY packages/twenty-server/package.json packages/twenty-server/
+COPY packages/twenty-shared/package.json packages/twenty-shared/
+COPY packages/twenty-emails/package.json packages/twenty-emails/
+COPY packages/twenty-ui/package.json packages/twenty-ui/
+
+# Устанавливаем все зависимости
+RUN yarn install
+
+# Копируем остальные файлы
+COPY . .
+
+# Собираем проект
+RUN yarn workspace twenty-server build
+
+# Запускаем миграции (можно попробовать, но зависит от CI/CD)
+# RUN yarn workspace twenty-server migrate
+
+# Запуск
+CMD ["yarn", "workspace", "twenty-server", "start:prod"]
